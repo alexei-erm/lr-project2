@@ -67,8 +67,7 @@ cpg = HopfNetwork(time_step=TIME_STEP)
 TEST_STEPS = int(10 / (TIME_STEP))
 t = np.arange(TEST_STEPS)*TIME_STEP
 
-# [TODO] initialize data structures to save CPG and robot states
-
+# [TODO] initialize data structures to save CPG and robot states - Needed for plotting
 
 ############## Sample Gains
 # joint PD gains
@@ -83,9 +82,10 @@ for j in range(TEST_STEPS):
   action = np.zeros(12) 
   # get desired foot positions from CPG 
   xs,zs = cpg.update()
+  
   # [TODO] get current motor angles and velocities for joint PD, see GetMotorAngles(), GetMotorVelocities() in quadruped.py
-  # q = env.robot.GetMotorAngles()
-  # dq = 
+  q = env.robot.GetMotorAngles()
+  dq = env.robot.GetMotorVelocities()
 
   # loop through desired foot positions and calculate torques
   for i in range(4):
@@ -93,19 +93,26 @@ for j in range(TEST_STEPS):
     tau = np.zeros(3)
     # get desired foot i pos (xi, yi, zi) in leg frame
     leg_xyz = np.array([xs[i],sideSign[i] * foot_y,zs[i]])
+    
     # call inverse kinematics to get corresponding joint angles (see ComputeInverseKinematics() in quadruped.py)
-    leg_q = np.zeros(3) # [TODO] 
+    leg_q = env.robot.ComputeInverseKinematics(i, leg_xyz) # [TODO] 
+    
     # Add joint PD contribution to tau for leg i (Equation 4)
-    tau += np.zeros(3) # [TODO] 
+    tau += kp*(leg_q - q[3*i: 3 + 3*i]) + kd*(0 - dq[3*i: 3 + 3*i]) # [TODO] 
 
     # add Cartesian PD contribution
     if ADD_CARTESIAN_PD:
       # Get current Jacobian and foot position in leg frame (see ComputeJacobianAndPosition() in quadruped.py)
-      # [TODO] 
+      motor_ang = q[3*i: 3 + 3*i]
+      J, pos = env.robot.ComputeJacobianAndPosition(i)
+      
       # Get current foot velocity in leg frame (Equation 2)
-      # [TODO] 
+      motor_vel = dq[3*i: 3 + 3*i]
+      foot_vel = J@motor_vel 
+      
       # Calculate torque contribution from Cartesian PD (Equation 5) [Make sure you are using matrix multiplications]
-      tau += np.zeros(3) # [TODO]
+      cartesian_pd = np.transpose(J)@(kpCartesian@(leg_xyz - pos) + kdCartesian@(0 - foot_vel))
+      tau += cartesian_pd # [TODO]
 
     # Set tau for legi in action vector
     action[3*i:3*i+3] = tau
