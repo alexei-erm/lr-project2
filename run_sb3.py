@@ -57,10 +57,12 @@ LEARNING_ALG = "SAC";  USE_GPU = True
 #                "observation_space_mode": "LR_COURSE_OBS"}
 env_configs = {}
 
-if USE_GPU and LEARNING_ALG=="SAC":
+if USE_GPU and LEARNING_ALG=="SAC":   # try "mps" for apple
     gpu_arg = "auto" 
 else:
     gpu_arg = "cpu"
+
+gpu_arg = "cuda"
 
 if LOAD_NN:
     interm_dir = "./logs/intermediate_models/"
@@ -72,7 +74,7 @@ if LOAD_NN:
 SAVE_PATH = './logs/intermediate_models/'+ datetime.now().strftime("%m%d%y%H%M%S") + '/'
 os.makedirs(SAVE_PATH, exist_ok=True)
 # checkpoint to save policy network periodically
-checkpoint_callback = CheckpointCallback(save_freq=30000, save_path=SAVE_PATH,name_prefix='rl_model', verbose=2)
+checkpoint_callback = CheckpointCallback(save_freq=30000, save_path=SAVE_PATH, name_prefix='rl_model', verbose=2)
 # create Vectorized gym environment
 env = lambda: QuadrupedGymEnv(**env_configs)  
 env = make_vec_env(env, monitor_dir=SAVE_PATH,n_envs=NUM_ENVS)
@@ -137,7 +139,9 @@ if LOAD_NN:
     print("\nLoaded model", model_name, "\n")
 
 # Learn and save (may need to train for longer)
-model.learn(total_timesteps=1000000, log_interval=1,callback=checkpoint_callback)
+# model.learn(total_timesteps=1000000, log_interval=1,callback=checkpoint_callback) # DEFAULT
+model.learn(total_timesteps=10000, log_interval=1,callback=checkpoint_callback)
+
 # Don't forget to save the VecNormalize statistics when saving the agent
 model.save( os.path.join(SAVE_PATH, "rl_model" ) ) 
 env.save(os.path.join(SAVE_PATH, "vec_normalize.pkl" )) 
