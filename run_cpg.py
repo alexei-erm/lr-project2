@@ -68,6 +68,8 @@ TEST_STEPS = int(10 / (TIME_STEP))
 t = np.arange(TEST_STEPS)*TIME_STEP
 
 # [TODO] initialize data structures to save CPG and robot states - Needed for plotting
+CPG = np.zeros(TEST_STEPS)
+States = np.zeros(TEST_STEPS)
 
 ############## Sample Gains
 # joint PD gains
@@ -121,6 +123,7 @@ for j in range(TEST_STEPS):
   env.step(action) 
 
   # [TODO] save any CPG or robot states
+
 
 
 
