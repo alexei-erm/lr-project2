@@ -68,7 +68,7 @@ TEST_STEPS = int(10 / (TIME_STEP))
 t = np.arange(TEST_STEPS)*TIME_STEP
 
 # [TODO] initialize data structures to save CPG and robot states - Needed for plotting
-CPG = np.zeros(TEST_STEPS)
+CPG = np.zeros(TEST_STEPS, 4)
 States = np.zeros(TEST_STEPS)
 
 ############## Sample Gains
@@ -84,6 +84,8 @@ for j in range(TEST_STEPS):
   action = np.zeros(12) 
   # get desired foot positions from CPG 
   xs,zs = cpg.update()
+  r = cpg.get_r
+  theta = cpg.get_theta
   
   # [TODO] get current motor angles and velocities for joint PD, see GetMotorAngles(), GetMotorVelocities() in quadruped.py
   q = env.robot.GetMotorAngles()
