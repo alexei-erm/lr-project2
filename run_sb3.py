@@ -50,19 +50,16 @@ LOAD_NN = False # if you want to initialize training with a previous model
 NUM_ENVS = 1    # how many pybullet environments to create for data collection
 USE_GPU = False # make sure to install all necessary drivers 
 
-LEARNING_ALG = "SAC";  USE_GPU = True
+# LEARNING_ALG = "SAC";  USE_GPU = True
 # after implementing, you will want to test how well the agent learns with your MDP: 
-# env_configs = {"motor_control_mode":"CPG",
-#                "task_env": "FLAGRUN", #  "LR_COURSE_TASK",
-#                "observation_space_mode": "LR_COURSE_OBS"}
-env_configs = {}
+env_configs = {"motor_control_mode":"PD",
+               "task_env": "FWD_LOCOMOTION", #  "LR_COURSE_TASK",
+               "observation_space_mode": "LR_COURSE_OBS"}
 
 if USE_GPU and LEARNING_ALG=="SAC":   # try "mps" for apple
     gpu_arg = "auto" 
 else:
     gpu_arg = "cpu"
-
-gpu_arg = "cuda"
 
 if LOAD_NN:
     interm_dir = "./logs/intermediate_models/"
@@ -103,7 +100,7 @@ ppo_config = {  "gamma":0.99,
                 "clip_range":0.2, 
                 "clip_range_vf":1,
                 "verbose":1, 
-                "tensorboard_log":None, 
+                "tensorboard_log":"/Users/alexei.ermochkine/Desktop/ma3/legged_robots/lr-project2/logs/tensorboard_logs", 
                 "_init_setup_model":True, 
                 "policy_kwargs":policy_kwargs,
                 "device": gpu_arg}
@@ -140,7 +137,7 @@ if LOAD_NN:
 
 # Learn and save (may need to train for longer)
 # model.learn(total_timesteps=1000000, log_interval=1,callback=checkpoint_callback) # DEFAULT
-model.learn(total_timesteps=10000, log_interval=1,callback=checkpoint_callback)
+model.learn(total_timesteps=1000000, log_interval=1,callback=checkpoint_callback)
 
 # Don't forget to save the VecNormalize statistics when saving the agent
 model.save( os.path.join(SAVE_PATH, "rl_model" ) ) 
